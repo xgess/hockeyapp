@@ -79,7 +79,7 @@ class Application(api.APIRequest):
         if app_id:
             self._check_app_id(app_id)
         self._app_id = app_id
-        super(Application, self).__init__(token)
+        super(self.__class__, self).__init__(token)
 
     def create(self, title, bundle_identifier, platform='iOS', release_type=0):
         """Create a new application without uploading a file.
