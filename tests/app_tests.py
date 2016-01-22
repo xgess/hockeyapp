@@ -41,7 +41,19 @@ class ApplicationTestCase(unittest.TestCase):
 
     @mock.patch.object(app.Application, '_check_app_id')
     @mock.patch.object(app.Application, '_get')
-    def test_verions(self, get, _):
+    def test_versions(self, get, _):
         application = app.Application(self.TOKEN, app_id=self.APP_IDENTIFIER)
         application.versions()
         get.assert_called_with(uri_parts=['apps', self.APP_IDENTIFIER, 'app_versions'])
+
+    @mock.patch.object(app.Application, '_check_app_id')
+    @mock.patch.object(app.Application, '_get')
+    def test_crash_group_search(self, get, _):
+        query_string = 'created_at:[\"2014-05-01T00:00\"+TO+\"2014-05-30T23:59\"]'
+        expected_request_params = 'order=asc&page=1&per_page=25&query=created_at:["2014-05-01T00:00"+TO+"2014-05-30T23:59"]&symbolication=0'
+        expected_uri_parts = ['apps', self.APP_IDENTIFIER, 'crash_reasons', 'search']
+        application = app.Application(self.TOKEN, app_id=self.APP_IDENTIFIER)
+
+        application.crash_group_search(query_string)
+
+        get.assert_called_with(uri_parts=expected_uri_parts, params=expected_request_params)
