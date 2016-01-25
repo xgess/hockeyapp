@@ -147,7 +147,7 @@ class Application(api.APIRequest):
 
 
     def crash_group_search(self, query_string, symbolicated=False, offset=1, limit=25, order='asc'):
-        """Search for crash groups using query params.
+        """Search for crash groups using query params. Results are paginated crash groups.
         Hockeyapp requires date searching params to be encoded in an unusual format
         e.g. .../search?query=created_at:[\"2012-10-22T00:00\"+TO+\"2016-01-01T23:59\"]
         Requests.get would url escape this string into something that hockeyapp won't recognize.
@@ -216,6 +216,45 @@ class Application(api.APIRequest):
                            response.get('total_pages', 0),
                            response.get('current_page', 0),
                            response.get('per_page', 0))
+
+    def crash_search(self, query_string, symbolicated=False, offset=1, limit=25, order='asc'):
+        """Search for crashes using query params. Results are paginated crashes.
+        Hockeyapp requires date searching params to be encoded in an unusual format
+        e.g. .../search?query=created_at:[\"2012-10-22T00:00\"+TO+\"2016-01-01T23:59\"]
+        Requests.get would url escape this string into something that hockeyapp won't recognize.
+        For this reason, the query_string of
+            `'created_at:[\"2014-05-01T00:00\"+TO+\"2014-05-30T23:59\"]'`
+        is not cleaned up at all before being passed into Requests.get.
+        See help text in the hockeyapp web search UI under crashes for more about
+        HockeyApp-specific querying.
+
+        :param str query_string: query search params already url formatted
+        :param bool symbolicated: run crashes through the symbolication process
+        :param int offset: The offset for the page of feedback
+        :param int limit: The maximum number of entries per page (25, 50, 100)
+        :param str order: Order of items in list, ``asc`` or ``desc``
+        :rtype: Feedback
+
+        """
+        if order not in ['asc', 'desc']:
+            raise ValueError('order must either be "asc" or "desc"')
+
+        url_components = ['apps', self._app_id, 'crashes', 'search']
+        request_params = {'query': query_string,
+                           'symbolication': int(symbolicated),
+                           'page': offset,
+                           'per_page': limit,
+                           'order': order}
+        request_params_as_string = self._stringify_params_without_escape(request_params)
+
+        response = self._get(uri_parts=url_components,
+                             params=request_params_as_string)
+        return Crashes(response.get('crashes', []),
+                       response.get('total_entries', 0),
+                       response.get('total_pages', 0),
+                       response.get('current_page', 0),
+                       response.get('per_page', 0))
+
 
     def crashes(self, reason_id, offset=0, limit=25):
         """Paginated list of crashes in a crash reason group.
