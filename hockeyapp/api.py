@@ -120,6 +120,8 @@ class APIRequest(object):
         if 200 <= response.status_code <= 300:
             if 'application/json' in response.headers['Content-Type']:
                 return response.json()
+            if self._api_rate_limit_exceeded(response):
+                raise APIError({'429': 'Rate Limit Exceeded'})
             return response.content
         if response.status_code == 404:
             raise APIError({'404': 'URL Not Found: %s' % response.url})
@@ -127,6 +129,9 @@ class APIRequest(object):
             raise APIError(response.json().get('errors'))
         LOGGER.debug(response.content)
         raise APIError('Not JSON')
+
+    def _api_rate_limit_exceeded(self, response):
+        return response.content == b'202 Accepted (Rate Limit Exceeded)\n'
 
     @property
     def _uri(self):

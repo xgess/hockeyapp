@@ -67,5 +67,11 @@ class APIRequestTestCase(unittest.TestCase):
         with httmock.HTTMock(response_content):
             self.assertEqual(self.api._get(['app_versions']), expectation)
 
-
-
+    def test_get_with_rate_limit_throws_api_error(self):
+        @httmock.all_requests
+        def response_content(url, request):
+            headers = {'content-type': 'text/plain; charset=utf-8', 'status': '202 Accepted'}
+            content = b'202 Accepted (Rate Limit Exceeded)\n'
+            return httmock.response(202, content, headers, None, 5, request)
+        with httmock.HTTMock(response_content):
+            self.assertRaises(api.APIError, self.api._get, ['anything'])
