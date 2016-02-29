@@ -1,7 +1,6 @@
 import setuptools
 import sys
 
-from hockeyapp import __version__
 
 requirements = ['requests']
 tests_require = ['nose', 'mock', 'httmock']
@@ -12,7 +11,7 @@ if sys.version_info < (2, 7, 0):
 console_scripts = ['hockeyapp-cli=hockeyapp.cli:main']
 
 setuptools.setup(name='hockeyapp',
-                 version=__version__,
+                 version='0.5.0',
                  description='API and command-line client for managing '
                              'applications, users, and crashes at HockeyApp',
                  long_description=open('README.rst').read(),
