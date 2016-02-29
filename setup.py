@@ -11,7 +11,7 @@ if sys.version_info < (2, 7, 0):
 console_scripts = ['hockeyapp-cli=hockeyapp.cli:main']
 
 setuptools.setup(name='hockeyapp',
-                 version='0.5.0',
+                 version='0.4.0dev',
                  description='API and command-line client for managing '
                              'applications, users, and crashes at HockeyApp',
                  long_description=open('README.rst').read(),
